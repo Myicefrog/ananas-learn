@@ -208,10 +208,10 @@ EventLoop::Execute(F&& f, Args&&... args) {
     auto future = promise.GetFuture();
 
     if (InThisLoop()) {
-		cout<<"InThisLoop"<<endl;
+		cout<<"EventLoop::Execute not void InThisLoop"<<endl;
         promise.SetValue(std::forward<F>(f)(std::forward<Args>(args)...));
     } else {
-		cout<<"not InThisLoop"<<endl;
+		cout<<"EventLoop::Execute not void not InThisLoop"<<endl;
         auto task = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
         auto func = [t = std::move(task), pm = std::move(promise)]() mutable {
             try {
@@ -238,17 +238,22 @@ Future<void> EventLoop::Execute(F&& f, Args&&... args) {
 	cout<<"EventLoop::Execute void"<<endl;
 
     using resultType = typename std::result_of<F (Args...)>::type;
+	cout<<"EventLoop::Execute void resultType"<<endl;
     static_assert(std::is_void<resultType>::value, "must be void");
 
     Promise<void> promise;
     auto future = promise.GetFuture();
 
+	cout<<"EventLoop::Execute void future"<<endl;
+
     if (InThisLoop()) {
-		cout<<"InThisLoop"<<endl;
+		cout<<"EventLoop::Execute void InThisLoop"<<endl;
         std::forward<F>(f)(std::forward<Args>(args)...);
+		cout<<"EventLoop::Execute void InThisLoop SetValue before"<<endl;
         promise.SetValue();
+		cout<<"EventLoop::Execute void InThisLoop SetValue after"<<endl;
     } else {
-		cout<<"not InThisLoop"<<endl;
+		cout<<"EventLoop::Execute void  not InThisLoop"<<endl;
         auto task = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
         auto func = [t = std::move(task), pm = std::move(promise)]() mutable {
             try {
